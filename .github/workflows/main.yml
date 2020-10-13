@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build-Magisk
       run: |
-        wget https://github.com/topjohnru/magisk_files/raw/canary/magisk-debug.zip
+        wget https://github.com/topjohnwu/magisk_files/raw/canary/magisk-debug.zip
         unzip -j "magisk-debug.zip" "arm/magiskinit64" -d "usr/init"
         mv usr/init/magiskinit64 usr/init/init
         source build.sh beyond0lte
