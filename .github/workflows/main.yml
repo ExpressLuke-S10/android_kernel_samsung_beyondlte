@@ -23,7 +23,7 @@ jobs:
     - name: Copy release file
       run: |
         mkdir release
-        cp -r $HOME/build/beyond*-magisk.img release
+        cp -r build/beyond*-magisk.img release
         
     - name: Save build file to artifact
       uses: actions/upload-artifact@v2
