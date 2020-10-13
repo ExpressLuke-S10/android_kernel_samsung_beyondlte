@@ -1,0 +1,81 @@
+name: Build Magisk kernels
+
+on:
+  push:
+    branches: [ standalone_17.1 ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build-Magisk
+      run: |
+        wget https://github.com/topjohnru/magisk_files/raw/canary/magisk-debug.zip
+        unzip -j "magisk-debug.zip" "arm/magiskinit64" -d "usr/init"
+        mv usr/init/magiskinit64 usr/init/init
+        source build.sh beyond0lte
+        source build.sh beyond1lte
+        source build.sh beyond2lte
+  
+    - name: Copy release file
+      run: |
+        mkdir release
+        cp -r $HOME/build/beyond*-magisk.img release
+        
+    - name: Save build file to artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: release
+        path: release/*
+        
+    - name : Date
+      id: date
+      run: echo "::set-output name=date::$(date +"%d-%m-%Y")"
+
+    - name: Create Release
+      id: create_release 
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NTAG_NAME: ${{ steps.date.outputs.date }}
+      with:
+          tag_name: ${{ steps.date.outputs.date }}
+          release_name: Release ${{ steps.date.outputs.date }}
+          draft: false
+          prerelease: false
+
+    - name: Upload Release Beyond0lte
+      id: upload-release-magisk-beyond0lte
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./release/*beyond0*
+          asset_name: beyond0lte-boot-magisk_canary
+          asset_content_type: application/octet-stream
+
+    - name: Upload Release Beyond1lte
+      id: upload-release-magisk-beyond1lte
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./release/*beyond1*
+          asset_name: beyond1lte-boot-magisk_canary.img
+          asset_content_type: application/octet-stream
+
+    - name: Upload Release Beyond2lte
+      id: upload-release-magisk-beyond2lte
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./release/*beyond2*
+          asset_name: beyond2lte-boot-magisk_canary.img
+          asset_content_type: application/octet-stream
